@@ -5,6 +5,6 @@ been correctly implemented. I have the basics down, I've
 created this README, and I have also written the style
 sheet as is specified in the assignment.
 
-I have not collaborated with anyone on this assignment.
+I worked with a TA to debug a small issue on media queries.
 
-I spent X hours working on this assignment.
+I spent <1 hour working on this assignment.
