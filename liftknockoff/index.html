@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <title>Lift KnockOff</title>
+      <meta name="viewport" content="initial-scale=1.0">
+      <meta charset="utf-8">
+
+      <link rel="stylesheet" href="style.css">
+
+    </head>
+
+    <body>
+      <span class="metadata-marker" style="display: none;" data-region_tag="html-body"></span>
+
+      <!-- Div to hold the map -->
+      <div id="map"></div>
+
+      <script>
+        var map;
+
+        // Initializes the map in the div above
+        function initMap() {
+          map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: -34.397, lng: 150.644},
+            zoom: 8
+          });
+        }
+      </script>
+
+      <!-- Loading the maps API with my key-->
+      <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMf3fZ2__s5nMa2Bb4ALoHzGc80OLqYyI&callback=initMap"
+      async defer></script>
+
+    </body>
+
+  </html>
