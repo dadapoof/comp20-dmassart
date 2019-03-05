@@ -10,27 +10,123 @@
     </head>
 
     <body>
+
       <span class="metadata-marker" style="display: none;" data-region_tag="html-body"></span>
 
       <!-- Div to hold the map -->
       <div id="map"></div>
 
-      <script>
-        var map;
+    <script>
+      var map;
+      var http = new XMLHttpRequest();
+      var url = 'https://hans-moleman.herokuapp.com/rides';
+      var myLat = 0;
+      var myLng = 0;
 
-        // Initializes the map in the div above
-        function initMap() {
-          map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: -34.397, lng: 150.644},
-            zoom: 8
-          });
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 8,
+          center: {lat: 42.4184, lng: -71.1062}
+        });
+        getLocation();
+        // start();
+      }
+
+      function getLocation() {
+          navigator.geolocation.getCurrentPosition(function(somePos) {
+              myLat = somePos.coords.latitude;
+              myLng = somePos.coords.longitude;
+              start();
+            });
+      }
+
+      function start() {
+        http.open('POST', url, true);
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        weiner = false;
+
+        http.onreadystatechange = function() {
+            if(http.readyState == 4 && http.status == 200) {
+
+                response = JSON.parse(http.responseText);
+                passenger = false;
+                vehicle = false;
+
+                if (Object.keys(response) == "vehicles")
+                {
+                  passenger = true;
+                  response = response["vehicles"];
+                  console.log(response);
+                }
+                else {
+                  vehicle = true;
+                  response = response["passengers"];
+                }
+
+                var me = new google.maps.LatLng(myLat, myLng);
+                var min_distance = 100000;
+                var distance_weiner;
+                var cars = false;
+
+                for (i = 0; i < response.length; i++) {
+                    if (response[i]["username"] == "WEINERMOBILE") {
+                      weiner = true;
+                      weinerdist = new google.maps.LatLng(response[i]["lat"], response[i]["lng"]);
+                      distance_weiner = new google.maps.geometry.spherical.computeDistanceBetween(me, weinerdist);
+                    } else {
+                      vehicledist = new google.maps.LatLng(response[i]["lat"], response[i]["lng"]);
+                      distance = new google.maps.geometry.spherical.computeDistanceBetween(me, vehicledist);
+                      distance = distance * 0.00062137;
+                      if (distance < min_distance){
+                        min_distance = distance;
+                      }
+                      cars = true;
+                    }
+                }
+
+                if (weiner){
+                  distance_weiner = distance_weiner * 0.00062137;
+                  console.log(distance_weiner);
+                  if (cars){
+                    renderMap("The Weinermobile is " + distance_weiner + " miles away from me!", min_distance);
+                  } else {
+                    renderMap("The Weinermobile is " + distance_weiner + " miles away from me!", "No cars at the moment");
+                  }
+                } else {
+                  renderMap("The Weinermobile is nowhere to be seen.", min_distance);
+                }
+            }
         }
-      </script>
+          http.send("username=ZzAq87UZ&lat=" + myLat + "&lng=" + myLng);
+      }
 
-      <!-- Loading the maps API with my key-->
-      <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMf3fZ2__s5nMa2Bb4ALoHzGc80OLqYyI&callback=initMap"
-      async defer></script>
+
+      function renderMap(message, distance) {
+        me = new google.maps.LatLng(myLat, myLng);
+        var marker;
+        var infowindow = new google.maps.InfoWindow();
+
+        // Update map and go there...
+        map.panTo(me);
+        
+        // Create a marker
+        marker = new google.maps.Marker({
+          position: me,
+          title: "Username: ZzAq87UZ, Distance Away To Nearest vehicle/passenger: " + distance + ", Distance Away To Weinermobile(miles): " + message,
+          icon: "image.png"
+        });
+        marker.setMap(map);
+          
+        // Open info window on click of marker
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.setContent(marker.title);
+            infowindow.open(map, marker);
+        });
+      }
+
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyBZg80E0u6VZcpK86iYFj7m7m7Yu-_Tz-k&callback=initMap"></script>
 
     </body>
-
   </html>
