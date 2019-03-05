@@ -18,26 +18,31 @@
 
     <script>
       var map;
+      // Initialize the new XMLHTTPRequest
       var http = new XMLHttpRequest();
       var infowindow;
       var url = 'https://hans-moleman.herokuapp.com/rides';
       var myLat = 0;
       var myLng = 0;
 
-
+      // Callback function that initializes the map and calls getLocation()
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
           zoom: 8,
+          // This is Medford's Position
           center: {lat: 42.4184, lng: -71.1062}
         });
         getLocation();
       }
 
+      // Function that updates the latitude and longitude and calls start()
       function getLocation() {
+        // In case browser does not support geolocation
         if (navigator.geolocation){
           navigator.geolocation.getCurrentPosition(function(somePos) {
               myLat = somePos.coords.latitude;
               myLng = somePos.coords.longitude;
+              // Driver function that does most of the bulk of the lyft knockoff
               start();
             });
         } else {
@@ -46,8 +51,12 @@
         }
       }
 
+      // Start function that checks if we are a passenger or vehicle
+      // and acts accordingly
       function start() {
+        // Open the url to POST
         http.open('POST', url, true);
+        // Setting the Request Header
         http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 
         http.onreadystatechange = function() {
@@ -56,65 +65,78 @@
                 // Parsing the response (either vehicles or passengers)
                 response = JSON.parse(http.responseText);
 
-                // passenger = false;
-                // vehicle = false;
-                // weiner = false;
-
                 // In the case that we are a passenger
                 if (Object.keys(response) == "vehicles")
                 {
-                  // passenger = true;
-                  // response = response["vehicles"];
                   lyft(true, response["vehicles"]);
                 }
                 // In the case that we are a vehicle
                 else {
-                  // vehicle = true;
-                  // response = response["passengers"];
                   lyft(false, response["passengers"]);
                 }
 
 
             }
         }
+          // Sends the request!
           http.send("username=ZzAq87UZ&lat=" + myLat + "&lng=" + myLng);
       }
 
 
+      // Function that 
       function lyft(is_passenger, response) {
                 var min_distance = 100000;
                 var distance_weiner;
                 var distance;
                 var v_or_p = false;
                 var weiner = false;
+                // Declaring one single infowindow
                 infowindow = new google.maps.InfoWindow();
 
                 for (i = 0; i < response.length; i++) {
+                    // Checking if there is a weinermobile
                     if (response[i]["username"] == "WEINERMOBILE") {
                       weiner = true;
+                      // Get location of weinermobile
                       var location = new google.maps.LatLng(parseFloat(response[i]["lat"]), parseFloat(response[i]["lng"]));
+                      // calculate distance bewteen myself and weinermobile
                       distance_weiner = distancebetween(location, myLat, myLng);
+                      // Put the marker for weinermobile and render map
                       renderMap(location, "", "weinermobile.png");
                     } else {
+                      // Get location of driver or passenger
                       var location = new google.maps.LatLng(parseFloat(response[i]["lat"]), parseFloat(response[i]["lng"]));
+                      // Calculate distance between myself and passenger/driver
                       distance = distancebetween(location, myLat, myLng);
 
+                      // Checking for the smallest distance
                       if (distance < min_distance){
                         min_distance = distance;
                       }
+
                       v_or_p = true;
                       if (is_passenger){
+                        // renders map for a passenger
                         renderMap(location, "Username: " + response[i]["username"] + ", Distance away (miles): " + distance, "car.png");
                       } else {
+                        // renders map for a driver
                         renderMap(location, "Username: " + response[i]["username"] + ", Distance away (miles): " + distance, "passenger.png");
                       }
                     }
                 }
+                // Put a marker for every single vehicle/passenger
                 mark_message(weiner, v_or_p, distance_weiner, min_distance);
       }
 
 
+      // Function that puts a marker for every single vehicle/passenger
+      // Covers the different cases:
+      // 1. There is a weinermobile and there are passengers/vehicles
+      // 2. There is a weinermobile and there are no passengers/vehicles
+      // 3. There is no weinermobile and there are passengers/vehicles
+      // 4. There is no weinermobile and there are no passengers/vehicles
       function mark_message(weiner, v_or_p, distance_weiner, min_distance) {
+          // Weiner Mobile
           if (weiner){
             if (v_or_p){
               var me = new google.maps.LatLng(myLat, myLng);
@@ -135,12 +157,16 @@
           }
       }
 
+
+      // Function to calculate distance between a location (LatLng) and a lat/lng
       function distancebetween(location, lat2, lng2) {
         latlng2 = new google.maps.LatLng(lat2, lng2);
         distance = google.maps.geometry.spherical.computeDistanceBetween(latlng2, location);
         return (distance/1609.344);
       }
 
+      // Function that puts a marker and its info window
+      // Renders the map
       function renderMap(location, titles, icons) {
         var marker;
 
