@@ -19,6 +19,7 @@
     <script>
       var map;
       var http = new XMLHttpRequest();
+      var infowindow;
       var url = 'https://hans-moleman.herokuapp.com/rides';
       var myLat = 0;
       var myLng = 0;
@@ -30,92 +31,129 @@
           center: {lat: 42.4184, lng: -71.1062}
         });
         getLocation();
-        // start();
       }
 
       function getLocation() {
+        if (navigator.geolocation){
           navigator.geolocation.getCurrentPosition(function(somePos) {
               myLat = somePos.coords.latitude;
               myLng = somePos.coords.longitude;
               start();
             });
+        } else {
+          alert("Please allow geolocation on this web browser or you won't be able to \
+            use LyftKnockOff!");
+        }
       }
 
       function start() {
         http.open('POST', url, true);
         http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        weiner = false;
 
         http.onreadystatechange = function() {
             if(http.readyState == 4 && http.status == 200) {
 
+                // Parsing the response (either vehicles or passengers)
                 response = JSON.parse(http.responseText);
-                passenger = false;
-                vehicle = false;
 
+                // passenger = false;
+                // vehicle = false;
+                // weiner = false;
+
+                // In the case that we are a passenger
                 if (Object.keys(response) == "vehicles")
                 {
-                  passenger = true;
-                  response = response["vehicles"];
-                  console.log(response);
+                  // passenger = true;
+                  // response = response["vehicles"];
+                  lyft(true, response["vehicles"]);
                 }
+                // In the case that we are a vehicle
                 else {
-                  vehicle = true;
-                  response = response["passengers"];
+                  // vehicle = true;
+                  // response = response["passengers"];
+                  lyft(false, response["passengers"]);
                 }
 
-                var me = new google.maps.LatLng(myLat, myLng);
-                var min_distance = 100000;
-                var distance_weiner;
-                var cars = false;
 
-                for (i = 0; i < response.length; i++) {
-                    if (response[i]["username"] == "WEINERMOBILE") {
-                      weiner = true;
-                      weinerdist = new google.maps.LatLng(response[i]["lat"], response[i]["lng"]);
-                      distance_weiner = new google.maps.geometry.spherical.computeDistanceBetween(me, weinerdist);
-                    } else {
-                      vehicledist = new google.maps.LatLng(response[i]["lat"], response[i]["lng"]);
-                      distance = new google.maps.geometry.spherical.computeDistanceBetween(me, vehicledist);
-                      distance = distance * 0.00062137;
-                      if (distance < min_distance){
-                        min_distance = distance;
-                      }
-                      cars = true;
-                    }
-                }
-
-                if (weiner){
-                  distance_weiner = distance_weiner * 0.00062137;
-                  console.log(distance_weiner);
-                  if (cars){
-                    renderMap("The Weinermobile is " + distance_weiner + " miles away from me!", min_distance);
-                  } else {
-                    renderMap("The Weinermobile is " + distance_weiner + " miles away from me!", "No cars at the moment");
-                  }
-                } else {
-                  renderMap("The Weinermobile is nowhere to be seen.", min_distance);
-                }
             }
         }
           http.send("username=ZzAq87UZ&lat=" + myLat + "&lng=" + myLng);
       }
 
 
-      function renderMap(message, distance) {
-        me = new google.maps.LatLng(myLat, myLng);
+      function lyft(is_passenger, response) {
+                var min_distance = 100000;
+                var distance_weiner;
+                var distance;
+                var v_or_p = false;
+                var weiner = false;
+                infowindow = new google.maps.InfoWindow();
+
+                for (i = 0; i < response.length; i++) {
+                    if (response[i]["username"] == "WEINERMOBILE") {
+                      weiner = true;
+                      var location = new google.maps.LatLng(parseFloat(response[i]["lat"]), parseFloat(response[i]["lng"]));
+                      distance_weiner = distancebetween(location, myLat, myLng);
+                      renderMap(location, "", "weinermobile.png");
+                    } else {
+                      var location = new google.maps.LatLng(parseFloat(response[i]["lat"]), parseFloat(response[i]["lng"]));
+                      distance = distancebetween(location, myLat, myLng);
+
+                      if (distance < min_distance){
+                        min_distance = distance;
+                      }
+                      v_or_p = true;
+                      if (is_passenger){
+                        renderMap(location, "Username: " + response[i]["username"] + ", Distance away (miles): " + distance, "car.png");
+                      } else {
+                        renderMap(location, "Username: " + response[i]["username"] + ", Distance away (miles): " + distance, "passenger.png");
+                      }
+                    }
+                }
+                mark_message(weiner, v_or_p, distance_weiner, min_distance);
+      }
+
+
+      function mark_message(weiner, v_or_p, distance_weiner, min_distance) {
+          if (weiner){
+            if (v_or_p){
+              var me = new google.maps.LatLng(myLat, myLng);
+              renderMap(me, "Username: ZzAq87UZ, Distance Away To Nearest vehicle/passenger: " + min_distance + ", Distance Away To Weinermobile(miles): " + "The Weinermobile is " + distance_weiner + " miles away from me.", "image.png");
+            } else {
+              var me = new google.maps.LatLng(myLat, myLng);
+              renderMap(me, "Username: ZzAq87UZ, No passengers or vehicles at the moment, Distance Away To Weinermobile(miles): " + "The Weinermobile is " + distance_weiner + " miles away from me.", "image.png");
+              
+            }
+          } else {
+            if (v_or_p){
+              var me = new google.maps.LatLng(myLat, myLng);
+              renderMap(me, "Username: ZzAq87UZ, Distance Away To Nearest vehicle/passenger: " + min_distance + ", Distance Away To Weinermobile(miles): " + "The Weinermobile is nowhere to be seen.", "image.png");
+            } else {
+              var me = new google.maps.LatLng(myLat, myLng);
+              renderMap(me, "Username: ZzAq87UZ, No cars at the moment., Distance Away To Weinermobile(miles): " + "The Weinermobile is nowhere to be seen.", "image.png");
+            }
+          }
+      }
+
+      function distancebetween(location, lat2, lng2) {
+        latlng2 = new google.maps.LatLng(lat2, lng2);
+        distance = google.maps.geometry.spherical.computeDistanceBetween(latlng2, location);
+        return (distance/1609.344);
+      }
+
+      function renderMap(location, titles, icons) {
         var marker;
-        var infowindow = new google.maps.InfoWindow();
 
         // Update map and go there...
-        map.panTo(me);
+        map.panTo(location);
         
         // Create a marker
         marker = new google.maps.Marker({
-          position: me,
-          title: "Username: ZzAq87UZ, Distance Away To Nearest vehicle/passenger: " + distance + ", Distance Away To Weinermobile(miles): " + message,
-          icon: "image.png"
+          position: location,
+          title: titles,
+          icon: icons
         });
+
         marker.setMap(map);
           
         // Open info window on click of marker
