@@ -1,11 +1,18 @@
 David Massart pen testing on Armanc Keser's Lyft Knockoff.
 
-Introduction:
+
+--------- Introduction ---------
+
+As a pen tester, focusing on web applications, I was hired by Ahmet Armanc Keser to attempt to break his web application, [NAME OF APP]. This application is a web application that mimics a car sharing service. It operates on the client side (HTML, CSS, JavaScript) and a server side (Express) with a Mongo DataBase. There are two GET routes '/' and '/passenger.json' and a POST route '/rides'. The POST route allows a user to insert a username, latitude, and longitude in the database. The GET routes allow a user to query information based on a username.
+
+The only two security features that Armanc and I have enabled is the validator and the express-mongo-sanitizer which protect against noSQL injections and JavaScript XSS.
 
 
-Methodology:
+--------- Methodology ---------
 
-Abstract of Findings:
+
+
+--------- Abstract of Findings ---------
 
 
 Issues Found:
