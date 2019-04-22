@@ -3,7 +3,8 @@
 
 1. The purpose of this Git repository is for me to look back at 
 	this code in 10 years and realize how terrible I was at 
-	programming.
+	programming. Jokes aside, this github repo taught me 
+	more about git and helped me submit assignments...
 
 2. My favorite lab was the karaoke machine one because the song 
 	is very catchy and it was my first exposure to JavaScript 
