@@ -45,25 +45,93 @@
 		<h2>Issues Found</h2>
 		<ul>
 			<li>
-				X-XSS-Protection Header not set.<br />I ran nikto on the web app and it returned to me a series of warnings that could lead to vulnerabilities. The most notable was that the X-XSS-Protection Header was not set. This header is useful against Cross Site Scripting. I know that Armanc used validators to protect from JavaScript XSS but Nikto says that its better to include this header. OWASP Zed Attack Proxy also mentioned this warning.
+				<ul>
+					<h3>Issue: X-XSS-Protection Header not set.</h3>
+					<li>Location: All pages on the server.</li>
+					<li>Severity: Low since it is only a warning. However, this could turn out to be a much bigger vulnerability.</li>
+					<li>I ran nikto on the web app and it returned to me a series of warnings that could lead to vulnerabilities. The most notable was that the X-XSS-Protection Header was not set. This header is useful against Cross Site Scripting. I know that Armanc used validators to protect from JavaScript XSS but Nikto says that its better to include this header. OWASP Zed Attack Proxy also mentioned this warning.</li><br /><br />
+					<img src="img/nikto.png"/>
+					<br />
+					<li>Resolution: Include this header for every page on your web app.</li><br /><br />
+				</ul>
 			</li>
-			<li>X-Frame-Options Header not set.<br />I ran OWASP Zed Attack Proxy and one of the alerts it found was that the above header was not set. This header helps protect against ClickJacking attacks. Most browsers support this header so make sure that it is set on all web pages returned by your web app.
+			<li>
+				<ul>
+					<h3>Issue: X-Frame-Options Header not set.</h3>
+					<li>Location: All pages on the server.</li>
+					<li>Severity: Low since it is only a warning. However, this could turn out to be a much bigger vulnerability.</li>
+					<li>I ran OWASP Zed Attack Proxy and one of the alerts it found was that the above header was not set. This header helps protect against ClickJacking attacks. Most browsers support this header so make sure that it is set on all web pages returned by your web app.</li><br /><br />
+					<img src="img/owasp.png"/>
+					<br />
+					<li>Resolution: Include this header for every page on your web app.</li><br /><br />
+				</ul>
 			</li>
-			<li>X-Content-Type-Options Header Missing.<br />I ran OWASP Zed Attack Proxy and one of the alerts it found was that the above header was not set. Not setting this header allows older versions of Internet Explorer and Chrome to perform MIME-sniffing attacks on the response body and potentially causing the body to be interpreted and displayed as a different content type. Make sure to set this header to nosniff.
+			<li>
+				<ul>
+					<h3>Issue: X-Content-Type-Options Header Missing.</h3>
+					<li>Location: All pages on the server.</li>
+					<li>Severity: Low since it is only a warning. However, this could turn out to be a much bigger vulnerability.</li>
+					<li>I ran OWASP Zed Attack Proxy and one of the alerts it found was that the above header was not set. Not setting this header allows older versions of Internet Explorer and Chrome to perform MIME-sniffing attacks on the response body and potentially causing the body to be interpreted and displayed as a different content type. </li><br /><br />
+					<img src="img/owasp.png"/>
+					<br />
+					<li>Resolution: Make sure to set this header to nosniff for every page on your web app.</li><br /><br />
+				</ul>
 			</li>
-			<li>Content-Security-Policy header not set.<br />This is an effective measure to protect your site from XSS attacks. You can prevent the browser from loading malicious assets. See https://scotthelme.co.uk/content-security-policy-an-introduction/ for more information. I used securityheaders.com to find this.
+
+			<li>
+				<ul>
+					<h3>Issue: Content-Security-Policy header not set.</h3>
+					<li>Location: All pages on the server.</li>
+					<li>Severity: Low since it is only a warning. However, this could turn out to be a much bigger vulnerability.</li>
+					<li>This is an effective measure to protect your site from XSS attacks. You can prevent the browser from loading malicious assets. See https://scotthelme.co.uk/content-security-policy-an-introduction/ for more information. I used securityheaders.com to find this.</li><br /><br />
+					<img src="img/owasp.png"/>
+					<img src="img/one.png"/>
+					<img src="img/two.png"/>
+					<br />
+					<li>Resolution: Set this header for every page on your web app.</li><br /><br />
+				</ul>
 			</li>
-			<li>Referrer-Policy Header is not set.<br />This is a new header that allows a site to control how much information the browser includes with navigations away from a document and should be set by all sites. For more information: https://scotthelme.co.uk/a-new-security-header-referrer-policy/. I used securityheaders.com to find this.
+
+			<li>
+				<ul>
+					<h3>Issue: Referrer-Policy Header is not set.</h3>
+					<li>Location: All pages on the server.</li>
+					<li>Severity: Low since it is only a warning. However, this could turn out to be a much bigger vulnerability.</li>
+					<li>This is a new header that allows a site to control how much information the browser includes with navigations away from a document and should be set by all sites. For more information: https://scotthelme.co.uk/a-new-security-header-referrer-policy/. I used securityheaders.com to find this.</li><br /><br />
+					<img src="img/one.png"/>
+					<img src="img/two.png"/>
+					<br />
+					<li>Resolution: Set this header for every page on your web app.</li><br /><br />
+				</ul>
 			</li>
-			<li>Feature-Policy Header is not set.<br />This is a new header that allows a site to control which features and APIs can be used in the browser. For more information: https://scotthelme.co.uk/a-new-security-header-feature-policy/. I used securityheaders.com to find this.
+
+			<li>
+				<ul>
+					<h3>Issue: Feature-Policy Header is not set.</h3>
+					<li>Location: All pages on the server.</li>
+					<li>Severity: Low since it is only a warning. However, this could turn out to be a much bigger vulnerability.</li>
+					<li>This is a new header that allows a site to control which features and APIs can be used in the browser. For more information: https://scotthelme.co.uk/a-new-security-header-feature-policy/. I used securityheaders.com to find this.</li><br /><br />
+					<img src="img/one.png"/>
+					<img src="img/two.png"/>
+					<br />
+					<li>Resolution: Set this header for every page on your web app.</li><br /><br />
+				</ul>
 			</li>
-			<li>Did not redirect to HTTPS.<br />Of course, this was not mentioned in assignments 2 or 3, but http is quite unsecure and it might be worth to send traffic over HTTPS.
+
+			<li>
+				<ul>
+					<h3>Issue: Did not redirect to HTTPS.</h3>
+					<li>Location: All pages on the server.</li>
+					<li>Severity: Low since it is only a warning. However, this could turn out to be a much bigger vulnerability.</li>
+					<li>Of course, this was not mentioned in assignments 2 or 3, but http is quite unsecure and it might be worth to send traffic over HTTPS.</li>
+					<li>Resolution: Purchase an SSL certificate and install this certificate on your website's hosting account.</li>
+				</ul>
 			</li>
 		</ul>
 	</div>
 	<div>
 		<h2>Conclusion</h2>
-		<p>In conclusion, Armanc's web application was pretty secure. In the future, I would recommend setting all these headers and using HTTPS instead of HTTP. This will really ensure that you are as secure as possible. I had no luck with NoSQL or XSS attacks even with a proxy so the validation was very good.
+		<p>In conclusion, Armanc's web application was pretty secure. In the future, I would recommend setting all these headers and using HTTPS instead of HTTP. This will really ensure that your app is as secure as possible. I had no luck with NoSQL or XSS attacks even with a proxy so the validation was done well.
 		</p>
 	</div>
 	<div>
