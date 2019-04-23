@@ -7,108 +7,78 @@
 	<h1>David Massart pen testing on Armanc Keser's Lyft Knockoff.</h1>
 	<div>
 		<h2>Introduction</h2>
+		<p>As a pen tester, focusing on web applications, I was hired by Ahmet Armanc Keser to attempt to break his web application, mysterious-retreat-58234. This application is a web application that mimics a car sharing service. It operates on the client side (HTML, CSS, JavaScript) and a server side (Express) with a Mongo DataBase. There are two GET routes '/' and '/passenger.json' and a POST route '/rides'. The POST route allows a user to insert a username, latitude, and longitude in the database. The GET routes allow a user to query information based on a username.
+
+		The only two security features that Armanc and I have enabled is the validator and the express-mongo-sanitizer which protect against noSQL injections and JavaScript XSS.
+		</p>
 	</div>
 	<div>
 		<h2>Methodology</h2>
+		<p>I decided to try to break his web application using the following techniques/tools:</p>
+		<ul>
+			<li>JavaScript Cross Site Scripting (I know Armanc used validators to prevent against this but I might as well try.) I did this through curl, by posting data to his applicaiton. The data sent was javascript that could redirect to another website or do much worse.</li>
+			<li>No SQL Injections (I know Armanc prevented against this but I also might as well try.) I did this by using a mongoDB trick where you modify the key in the path of the URL (using GET). Example:
+			http..../?username[$ne]=something. This would allow me to query everything in the mongo database.</li>
+			<li>I used Server Side JS Injections such as: process.kill(process.pid) to try and conduct a DDoS attack on the server.
+			</li>
+			<li>I used curl to send data to the server (POST). This was helpful for any XSS testing.
+			</li>
+			<li>I used ZAP to find certain security vulnerabilities in the application.
+			</li>
+			<li>Used NMAP to try and find vulnerabilities in the web app. I did this through Kali Linux.
+			</li>
+			<li>Used Nikto to try and find vulnerabilities. Specifically dangerous files and outdated software (using old versions of mongo or similar). I did this through Kali Linux.
+			</li>
+			<li>I used websites like securityheaders.com to find vulnerabilities and see how I could exploit them.
+			</li>
+			<li>I used BurpSuite's proxy to intercept the parameters of a GET request and alter them to send XSS and NoSQL attacks. I used BurpSuite Community Edition.
+			</li>
+		</ul>
+ 
 	</div>
 	<div>
 		<h2>Abstract of Findings</h2>
+		<p>When penetration testing Armanc's Web Application, I found a couple of warnings - mostly headers not being set. His code defended against attacks that could deface or reroute the website quite effectively through the use of validators. However, there are some practices that Armanc could implement to ensure against attacks. Such practices include using HTTPS instead of HTTP and setting all the headers mentioned below.
+		</p>
 	</div>
 	<div>
 		<h2>Issues Found</h2>
+		<ul>
+			<li>
+				X-XSS-Protection Header not set.<br />I ran nikto on the web app and it returned to me a series of warnings that could lead to vulnerabilities. The most notable was that the X-XSS-Protection Header was not set. This header is useful against Cross Site Scripting. I know that Armanc used validators to protect from JavaScript XSS but Nikto says that its better to include this header. OWASP Zed Attack Proxy also mentioned this warning.
+			</li>
+			<li>X-Frame-Options Header not set.<br />I ran OWASP Zed Attack Proxy and one of the alerts it found was that the above header was not set. This header helps protect against ClickJacking attacks. Most browsers support this header so make sure that it is set on all web pages returned by your web app.
+			</li>
+			<li>X-Content-Type-Options Header Missing.<br />I ran OWASP Zed Attack Proxy and one of the alerts it found was that the above header was not set. Not setting this header allows older versions of Internet Explorer and Chrome to perform MIME-sniffing attacks on the response body and potentially causing the body to be interpreted and displayed as a different content type. Make sure to set this header to nosniff.
+			</li>
+			<li>Content-Security-Policy header not set.<br />This is an effective measure to protect your site from XSS attacks. You can prevent the browser from loading malicious assets. See https://scotthelme.co.uk/content-security-policy-an-introduction/ for more information. I used securityheaders.com to find this.
+			</li>
+			<li>Referrer-Policy Header is not set.<br />This is a new header that allows a site to control how much information the browser includes with navigations away from a document and should be set by all sites. For more information: https://scotthelme.co.uk/a-new-security-header-referrer-policy/. I used securityheaders.com to find this.
+			</li>
+			<li>Feature-Policy Header is not set.<br />This is a new header that allows a site to control which features and APIs can be used in the browser. For more information: https://scotthelme.co.uk/a-new-security-header-feature-policy/. I used securityheaders.com to find this.
+			</li>
+			<li>Did not redirect to HTTPS.<br />Of course, this was not mentioned in assignments 2 or 3, but http is quite unsecure and it might be worth to send traffic over HTTPS.
+			</li>
+		</ul>
 	</div>
 	<div>
 		<h2>Conclusion</h2>
+		<p>In conclusion, Armanc's web application was pretty secure. In the future, I would recommend setting all these headers and using HTTPS instead of HTTP. This will really ensure that you are as secure as possible. I had no luck with NoSQL or XSS attacks even with a proxy so the validation was very good.
+		</p>
 	</div>
 	<div>
 		<h2>References</h2>
+		<ul>
+			<li>General how to approach pen testing: https://jdow.io/blog/2018/03/18/web-application-penetration-testing-methodology/
+			</li>
+			<li>For No SQL Injections: https://www.sqreen.com/plugins/mongodb-injection AND https://www.owasp.org/index.php/Testing_for_NoSQL_injection
+			</li>
+			<li>For XSS: https://www.owasp.org/index.php/Testing_for_Cross_site_scripting
+			</li>
+			<li>ZAP: https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
+			</li>
+		</ul>
 	</div>
 
 </body>
 </html>
-
-
---------- Introduction ---------
-
-As a pen tester, focusing on web applications, I was hired by Ahmet Armanc Keser to attempt to break his web application, mysterious-retreat-58234. This application is a web application that mimics a car sharing service. It operates on the client side (HTML, CSS, JavaScript) and a server side (Express) with a Mongo DataBase. There are two GET routes '/' and '/passenger.json' and a POST route '/rides'. The POST route allows a user to insert a username, latitude, and longitude in the database. The GET routes allow a user to query information based on a username.
-
-The only two security features that Armanc and I have enabled is the validator and the express-mongo-sanitizer which protect against noSQL injections and JavaScript XSS.
-
-
---------- Methodology ---------
-
-I decided to try to break his web application using the following techniques/tools:
-
-- JavaScript Cross Site Scripting (I know Armanc used validators to prevent against this but I might
-	as well try.) I did this through curl, by posting data to his applicaiton. The data sent was
-	javascript that could redirect to another website or do much worse. Also used 
-
-- No SQL Injections (I know Armanc prevented against this but I also might as well try.) I did this by 
-	using a mongoDB trick where you modify the key in the path of the URL (using GET). Example:
-	http..../?username[$ne]=something. This would allow me to query everything in the mongo database.
-
-- I used Server Side JS Injections such as: process.kill(process.pid) to try and conduct a DDoS attack on the server.
-
-- I used curl to send data to the server (POST). This was helpful for any XSS testing.
-
-- I used ZAP to find certain security vulnerabilities in the application.
-
-- Used NMAP to try and find vulnerabilities in the web app. I did this through Kali Linux.
-
-- Used Nikto to try and find vulnerabilities. Specifically dangerous files and outdated software (using old versions of mongo or similar). I did this through Kali Linux.
-
-- I used websites like securityheaders.com to find vulnerabilities and see how I could exploit them.
-
-- I used BurpSuite's proxy to intercept the parameters of a GET request and alter them to send XSS and NoSQL attacks. I used BurpSuite Community Edition. 
-
-
---------- Abstract of Findings ---------
-
-When penetration testing Armanc's Web Application, I found a couple of warnings - mostly headers not being set. His code defended against attacks that could deface or reroute the website quite effectively through the use of validators. However, there are some practices that Armanc could implement to ensure against attacks. Such practices include using HTTPS instead of HTTP and setting all the headers mentioned below.
-
-
---------- Issues Found ---------
-
-1. X-XSS-Protection Header not set.
-	I ran nikto on the web app and it returned to me a series of warnings that could lead to vulnerabilities. The most notable was that the X-XSS-Protection Header was not set. This header is useful against Cross Site Scripting. I know that Armanc used validators to protect from JavaScript XSS but Nikto says that its better to include this header.
-	OWASP Zed Attack Proxy also mentioned this warning.
-
-2. X-Frame-Options Header not set.
-	I ran OWASP Zed Attack Proxy and one of the alerts it found was that the above header was not set. This header helps protect against ClickJacking attacks. Most browsers support this header so make sure that it is set on all web pages returned by your web app.
-
-3. X-Content-Type-Options Header Missing.
-	I ran OWASP Zed Attack Proxy and one of the alerts it found was that the above header was not set. Not setting this header allows older versions of Internet Explorer and Chrome to perform MIME-sniffing attacks on the response body and potentially causing the body to be interpreted and displayed as a different content type. Make sure to set this header to nosniff.
-
-4. Content-Security-Policy header not set. 
-	This is an effective measure to protect your site from XSS attacks. You can prevent the browser from loading malicious assets. See https://scotthelme.co.uk/content-security-policy-an-introduction/ for more information. I used securityheaders.com to find this.
-
-5. Referrer-Policy Header is not set. 
-	This is a new header that allows a site to control how much information the browser includes with navigations away from a document and should be set by all sites. For more information: https://scotthelme.co.uk/a-new-security-header-referrer-policy/. I used securityheaders.com to find this.
-
-6. Feature-Policy Header is not set.
-	This is a new header that allows a site to control which features and APIs can be used in the browser. For more information: https://scotthelme.co.uk/a-new-security-header-feature-policy/. I used securityheaders.com to find this.
-
-7. Did not redirect to HTTPS.
-	Of course, this was not mentioned in assignments 2 or 3, but http is quite unsecure and it might be worth to send traffic over HTTPS.
-
-
-
-Conclusion:
-
-In conclusion, Armanc's web application was pretty secure. In the future, I would recommend setting all these headers and using HTTPS instead of HTTP. This will really ensure that you are as secure as possible. I had no luck with NoSQL or XSS attacks even with a proxy so the validation was very good.
-
-
---------- References ---------
-
-General how to approach pen testing:
-	- https://jdow.io/blog/2018/03/18/web-application-penetration-testing-methodology/
-
-For No SQL Injections:
-	- https://www.sqreen.com/plugins/mongodb-injection
-	- https://www.owasp.org/index.php/Testing_for_NoSQL_injection
-
-For XSS:
-	- https://www.owasp.org/index.php/Testing_for_Cross_site_scripting
-
-ZAP:
-	- https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
